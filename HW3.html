@@ -27,8 +27,11 @@ body {
 
 <body> 
 
+<audio id="soundtrack" autoplay="" loop="" style="display:none"><source src="https://mliton165.github.io/GameProgramming/resource/HW3_bgm.mp3" type="audio/mp3"></audio>
+
 <script src="https://threejs.org/build/three.min.js"></script>
-<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js">
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
 <script src="https://raw.githack.com/mrdoob/three.js/dev/examples/js/misc/Gyroscope.js"></script>
 
@@ -93,18 +96,20 @@ function init() {
   renderer.setClearColor(0x888888);
   document.body.appendChild(renderer.domElement);
   
-  camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 1, 1000);
+  camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1000);
   camera.position.z = 500;
 
-  //camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
-  //camera.position.z = 500;
+  let spotLight = new THREE.SpotLight(0xffffff);
+  spotLight.position.set(0,100,0);
+  scene.add(spotLight);
   
   let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
   ////////////////////////////////////////////////////////////////
-  var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+  var gridXZ = new THREE.GridHelper(400, 20, 'red', 'white');
   scene.add(gridXZ);
 ////////////////
+
 	mine = new THREE.Group();
 	head = makeHead();
   torso = makeTorso();
@@ -145,11 +150,55 @@ function init() {
   gyro.add (camera);
   mine.add (gyro);
   
+  /////////////////////
+  /*gcontrol = {
+    theta1: 0.01,
+    theta2: 0.01,
+  };
+
+  var gui = new dat.GUI({load:loadJSON(), preset:'key1'});
+  gui.domElement.id = 'gui';
+
+	gui.remember (gcontrol);
+  
+  gui.add(gcontrol, 'theta1', -0.8, 0.5);
+  gui.add(gcontrol, 'theta2', -0.8, 0.8);*/
+  
 }
 
 function makeArm() {
 	var group = new THREE.Group();
-  var mat = new THREE.MeshNormalMaterial({transparent:true, opacity:opc});
+  
+  let loader = new THREE.TextureLoader();
+  let textures = [];
+  loader.crossOrigin = '';
+  textures[0] = loader.load("https://i.imgur.com/mSvrgjl.png");
+  textures[1] = loader.load("https://i.imgur.com/VrRwDLD.png");
+  textures[2] = loader.load("https://i.imgur.com/n6wKNNL.png");
+  textures[3] = loader.load("https://i.imgur.com/R1HKHpg.png");
+  
+  mat = [];
+          mat.push(new THREE.MeshBasicMaterial({
+              map: textures[3]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[2]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[0]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[0]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[0]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[1]
+            }),
+        
+          );
+  
   var body = new THREE.Mesh (new THREE.BoxGeometry(3.82*k, 1.24*k, 1.24*k), mat);
   
 	group.add (body);
@@ -157,11 +206,39 @@ function makeArm() {
   group.add (new THREE.AxesHelper (k));
 	return group;
 
-
 }
 function makeLeg() {
 	var group = new THREE.Group();
-  var mat = new THREE.MeshNormalMaterial({transparent:true, opacity:opc});
+  let loader = new THREE.TextureLoader();
+  let textures = [];
+  loader.crossOrigin = '';
+  textures[0] = loader.load("https://i.imgur.com/dbTtcUM.png");
+  textures[1] = loader.load("https://i.imgur.com/5fNSQw4.png");
+  textures[2] = loader.load("https://i.imgur.com/n6wKNNL.png");
+  textures[3] = loader.load("https://i.imgur.com/yEaQvaX.png");
+  
+  mat = [];
+          mat.push(new THREE.MeshBasicMaterial({
+              map: textures[3]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[2]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[0]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[0]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[0]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[1]
+            }),
+        
+          );
+  
   var body = new THREE.Mesh (new THREE.BoxGeometry(4.09*k, 1.26*k, 1.26*k), mat);
   
 	group.add (body);
@@ -173,8 +250,39 @@ function makeLeg() {
 }
 function makeHead() {
 	var headGroup = new THREE.Group();
-  var mat = new THREE.MeshNormalMaterial({transparent:true, opacity:opc});
-  //var mat = new THREE.MeshBasiclMaterial({map: loader.load('resources/images/wall.jpg')});
+  //var mat = new THREE.MeshPhongMaterial({color: 0x0000FF});
+  
+  let loader = new THREE.TextureLoader();
+          let textures = [];
+          loader.crossOrigin = '';
+          textures[0] = loader.load("https://i.imgur.com/Ny5SmDh.png"); //正臉
+          textures[1] = loader.load("https://i.imgur.com/Wm409bv.png"); //左臉
+          textures[2] = loader.load("https://i.imgur.com/2i1s8vf.png"); //右臉
+          textures[3] = loader.load("https://i.imgur.com/g14D4Y1.png"); //頭髮
+          textures[4] = loader.load("https://i.imgur.com/khj7gg4.png"); //下巴
+          textures[5] = loader.load('https://i.imgur.com/DmIVva7.png');
+          mat = [];
+          mat.push(new THREE.MeshBasicMaterial({
+              map: textures[1] //左臉
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[2] //右臉
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[3]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[4]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[3]
+            }),
+            new THREE.MeshBasicMaterial({
+              map: textures[0] //正臉
+            }),
+        
+          );
+  
   var headBody = new THREE.Mesh (new THREE.BoxGeometry(2.52*k, 2.52*k, 2.52*k), mat);
   
 	headGroup.add (headBody);
@@ -185,7 +293,10 @@ function makeHead() {
 
 function makeTorso () {
 	var group = new THREE.Group();
-  var mat = new THREE.MeshNormalMaterial({transparent:true, opacity:opc});
+  let loader = new THREE.TextureLoader();
+  var mat = new THREE.MeshBasicMaterial({
+      map: loader.load("https://i.imgur.com/nf62akP.png")
+  });
   var body = new THREE.Mesh (new THREE.BoxGeometry(2.52*k, 3.48*k, 1.26*k), mat);
   
 	group.add (body);
@@ -225,9 +336,9 @@ function keyframe2(t) {
 
 function animate() {
 
-camera.lookAt (mine.position)
-
-  angle += 0.02;
+  camera.lookAt (mine.position);
+  
+  angle += 0.008;
 
 //	head.rotation.y = Math.PI/6;
   keyframe(clock.getElapsedTime()); 
@@ -237,7 +348,7 @@ camera.lookAt (mine.position)
   arm2.rotation.y = intKey2[0]
   leg2.rotation.y = intKey2[1]
   
-  mine.position.set(60*Math.cos(angle), 0, -60*Math.sin(angle));
+  mine.position.set(80*Math.cos(angle), 0, -80*Math.sin(angle));
   mine.rotation.y = Math.PI/8+angle;
   //controls.update();
   requestAnimationFrame(animate);
