@@ -1,0 +1,572 @@
+
+<html>
+<head>
+<style>
+
+	body {
+	  background-color: #fff;
+	  color: #111;
+	  margin: 0px;
+	  overflow: hidden;
+	font-family: Monospace;
+	  font-size: 20px;
+	}
+	
+	#info {
+	  position: absolute;
+	  top: 0px;
+	  width: 100%;
+	  padding: 5px;
+	  text-align: center;
+	  color: #ffff00
+	}
+	
+	a {
+	  color: #00ffff
+	}
+	
+	strong {
+	  color: red
+	}
+	
+	#container {
+	  z-index: 0;
+	  left: 0px;
+	  top: 0px;
+	  overflow: hidden;
+	  position: absolute;
+	  width: 100%;
+	  height: 100%;
+	}
+
+</style>
+</head>
+
+<div id="info">HW4</div>
+
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/107/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<!--script src="https://rawgit.com/jyunming-chen/game3js/master/js/ccdbox.js"></script-->
+<!--script src="https://cdn.jsdelivr.net/gh/jyunming-chen/game3js@13a05103eb51d913dd7815939bf7ad45690e8dc9/js/ccdbox.js"></script-->
+<script src="https://jyunming-chen.github.io/game3js/js/ccdsys.js"></script>
+<audio controls volume="0.1" id="collisionsound" style="display:none">
+<source src="https://mliton165.github.io/GameProgramming/resource/hit.ogg" type='audio/ogg'>
+</audio>
+
+<script>
+
+var scene, renderer, camera;
+var zz = 0,
+  sign = 1;
+var field_len = 300;
+
+var puck;
+var raycaster;
+var mouse = new THREE.Vector2();
+var pickables = [];
+var pos, vel, force;
+var walls = [];
+
+var velTl1 = new THREE.Vector3(0, 0, 0);
+var velTl2 = new THREE.Vector3(0, 0, 0);
+var velP = new THREE.Vector3(0, 0, 0);;
+
+var clock = new THREE.Clock();
+var now = 0;
+var previousEnd = new THREE.Vector3();
+var previousEnd2 = new THREE.Vector3();
+
+var m = 1;
+var r = 15;
+var dt = 0.1;
+var eps = 1e-3; // 0.001 
+var cR = 1.0;
+
+var ps = 0;
+var ais = 0;
+
+/////////////////////////
+var twoLinkArm;
+//var target;
+var twoLinker = { // no need to make it a CLASS (one of a kind)
+  theta1: 0,
+  theta2: 0,
+  target: new THREE.Vector3(),
+
+  init: function() {
+    let twoLinkArm = new THREE.Object3D();
+
+    this.link1 = makeLink(50)
+    this.link2 = makeLink(50)
+
+    twoLinkArm.add(this.link1);
+    this.link1.add(this.link2);
+    this.link2.position.set(50, 0, 0);
+
+    //
+    this.paddle = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 4, 20), new THREE.MeshBasicMaterial({
+      //transparent: true,
+      //opacity: 0.5,
+      visible: true,
+      color: 'red'
+    }))
+    ve1tl1 = new THREE.Vector3(10, 0, 10);
+
+    //this.paddle = new pucks(new THREE.Mesh (new THREE.CylinderGeometry (15,15,4,20), new THREE.MeshNormalMaterial()));
+    this.link2.add(this.paddle)
+    this.paddle.position.x = 60;
+
+    // base
+    let cyl_geom = new THREE.CylinderGeometry(10, 10, 6, 32);
+    let cyl_mat = new THREE.MeshBasicMaterial({
+      color: 0xff2211
+    });
+    let base = new THREE.Mesh(cyl_geom, cyl_mat);
+    //twoLinkArm.add(base);
+    return twoLinkArm;
+  },
+
+  // ccdSys: to be added later
+
+  update: function(thetas) { // pass jointAngleArray
+    this.theta1 = thetas[0]
+    this.theta2 = thetas[1]
+    this.link1.rotation.y = this.theta1;
+    this.link2.rotation.y = this.theta2;
+  }
+}
+
+var twoLinker2 = { // no need to make it a CLASS (one of a kind)
+  theta1: 0,
+  theta2: 0,
+  target: new THREE.Vector3(),
+
+  init: function() {
+    let twoLinkArm = new THREE.Object3D();
+
+    this.link1 = makeLink(50)
+    this.link2 = makeLink(50)
+
+    twoLinkArm.add(this.link1);
+    this.link1.add(this.link2);
+    this.link2.position.set(50, 0, 0);
+
+    //
+    this.paddle = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 4, 20), new THREE.MeshBasicMaterial({
+      //transparent: true,
+      //opacity: 0.5,
+      visible: true,
+      color: 'red'
+    }))
+    this.link2.add(this.paddle)
+    this.paddle.position.x = 60;
+
+    // base
+    let cyl_geom = new THREE.CylinderGeometry(10, 10, 6, 32);
+    let cyl_mat = new THREE.MeshBasicMaterial({
+      color: 0xff2211
+    });
+    let base = new THREE.Mesh(cyl_geom, cyl_mat);
+    //twoLinkArm.add(base);
+    return twoLinkArm;
+  },
+
+  // ccdSys: to be added later
+
+  update: function(thetas) { // pass jointAngleArray
+    this.theta1 = thetas[0]
+    this.theta2 = thetas[1]
+    this.link1.rotation.y = this.theta1;
+    this.link2.rotation.y = this.theta2;
+  }
+}
+
+init();
+animate();
+
+////////////////////////////////////////////////////////
+// forward kinematics
+function fk(theta, joints) { // all memory assumed in place
+  joints[0].set(0, 0, 0);
+
+  var localzero = new THREE.Vector3(0, 0, 0);
+  var m = new THREE.Matrix4();
+  m.makeRotationY(theta[0]);
+  m.multiply(new THREE.Matrix4().makeTranslation(50, 0, 0));
+  localzero.applyMatrix4(m);
+  joints[1].copy(localzero);
+
+  localzero.set(0, 0, 0);
+  m.multiply(new THREE.Matrix4().makeRotationY(theta[1]));
+  m.multiply(new THREE.Matrix4().makeTranslation(50, 0, 0));
+  localzero.applyMatrix4(m);
+  joints[2].copy(localzero);
+}
+////////////////////////////////////////////////////////////////
+function init() {
+
+  renderer = new THREE.WebGLRenderer({
+    antialias: true
+  });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x888888);
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+  camera.position.y = 160;
+  camera.position.z = 400;
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+  document.body.appendChild(renderer.domElement);
+  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+  pucklight = new THREE.PointLight(0x5cf2f2, 1, 100);
+  //light.position.set( 50, 50, 50 );
+  scene.add(pucklight);
+
+  var light = new THREE.AmbientLight(0x202020); // soft white light
+  scene.add(light);
+
+  var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+  //scene.add(gridXZ);
+  window.addEventListener('resize', onWindowResize, false);
+  /////////////////////////////////////////////////////////////////////
+
+
+  let plane = new THREE.Mesh(new THREE.PlaneGeometry(200, field_len), new THREE.MeshNormalMaterial());
+  scene.add(plane);
+  plane.rotation.x = -Math.PI / 2;
+  pickables = [plane];
+
+  let mat = new THREE.TextureLoader().load('https://mliton165.github.io/GameProgramming/resource/field.png');
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(200, field_len), new THREE.MeshBasicMaterial({
+    map: mat,
+    opacity: 0.8,
+    transparent: true
+  }));
+  scene.add(floor);
+  floor.rotation.x = -Math.PI / 2
+
+  puck = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 4, 20), new THREE.MeshNormalMaterial());
+  scene.add(puck);
+  puck.position.z = 50;
+
+  raycaster = new THREE.Raycaster();
+  document.addEventListener('mousemove', onDocumentMouseDown, false);
+  /////////////////////////////////////////////
+  twoLinkArm = twoLinker.init();
+  scene.add(twoLinkArm)
+
+  // move two-link-arm to random place & orientation
+  twoLinkArm.position.set(0, 0, field_len / 2);
+  //twoLinkArm.rotation.y = -Math.PI/2
+
+  // setting ccdSys
+  twoLinker.ccdSys = new CCDSys(fk)
+  // axes are in local frame of twolink arm
+  twoLinker.ccdSys.setCCDAxis(new THREE.Vector3(0, 1, 0), 0)
+  twoLinker.ccdSys.setCCDAxis(new THREE.Vector3(0, 1, 0), 1, -3.1, -0.01)
+
+  //////////////
+
+  twoLinkArm2 = twoLinker2.init();
+  scene.add(twoLinkArm2)
+
+  // move two-link-arm to random place & orientation
+  twoLinkArm2.position.set(0, 0, -(field_len / 2));
+  twoLinkArm2.rotation.y = Math.PI / 2
+
+  // setting ccdSys
+  twoLinker2.ccdSys = new CCDSys(fk)
+  // axes are in local frame of twolink arm
+  twoLinker2.ccdSys.setCCDAxis(new THREE.Vector3(0, 1, 0), 0)
+  twoLinker2.ccdSys.setCCDAxis(new THREE.Vector3(0, 1, 0), 1, -3.1, -0.01)
+
+  /// boundary
+  wall = new THREE.Mesh(new THREE.BoxGeometry(10, 20, field_len), new THREE.MeshPhongMaterial());
+  scene.add(wall);
+
+  wall.position.set(100, 10, 0);
+
+  wall.point = new THREE.Vector3(100, 0, 0);
+  wall.normal = new THREE.Vector3(-1, 0, 0);
+  walls.push(wall);
+  ///
+  wall = new THREE.Mesh(new THREE.BoxGeometry(10, 20, field_len), new THREE.MeshPhongMaterial());
+  scene.add(wall);
+  wall.position.set(-100, 10, 0);
+
+  wall.point = new THREE.Vector3(-100, 0, 0);
+  wall.normal = new THREE.Vector3(1, 0, 0);
+  walls.push(wall);
+  ///
+  wall = new THREE.Mesh(new THREE.BoxGeometry(200, 20, 10), new THREE.MeshPhongMaterial());
+  scene.add(wall);
+  wall.position.set(0, 10, field_len / 2);
+
+  wall.point = new THREE.Vector3(0, 0, field_len / 2);
+  wall.normal = new THREE.Vector3(0, 0, -1);
+  walls.push(wall);
+  ///
+  wall = new THREE.Mesh(new THREE.BoxGeometry(200, 20, 10), new THREE.MeshPhongMaterial());
+  scene.add(wall);
+  wall.position.set(0, 10, -(field_len / 2));
+
+  wall.point = new THREE.Vector3(0, 0, -(field_len / 2));
+  wall.normal = new THREE.Vector3(0, 0, 1);
+  walls.push(wall);
+
+  //////////////////
+  force = new THREE.Vector3(0, 0, 0);
+  //velP = new THREE.Vector3(-1, 0, 1);
+  pos = new THREE.Vector3();
+
+}
+
+function makeLink(length) {
+  var oneLink = new THREE.Object3D();
+  var mesh = new THREE.Mesh(new THREE.BoxGeometry(length, 10, 10), new THREE.MeshNormalMaterial());
+  mesh.visible = false;
+  oneLink.add(mesh);
+  mesh.position.set(length / 2, 0, 0);
+  return oneLink;
+}
+
+function onWindowResize() {
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+  renderer.setSize(width, height);
+}
+
+function animate() {
+
+  if (puck.position.z < 0) {
+    twoLinker2.target.copy(twoLinkArm2.worldToLocal(puck.position.clone()))
+  }
+
+  physics();
+  result();
+  requestAnimationFrame(animate);
+  //update();
+  updateArms();
+  render();
+}
+
+function update() {
+
+  var thetas = [twoLinker.theta1, twoLinker.theta2];
+
+  // target is from mousedown callback
+  twoLinker.ccdSys.solve(twoLinker.target, thetas);
+  twoLinker.update(thetas)
+  let posNow1 = twoLinker.link2.localToWorld(twoLinker.paddle.position.clone());
+  velTl1.copy(posNow1.clone().sub(posOld1).divideScalar(dt));
+  posOld1.copy(posNow1);
+
+  var thetas2 = [twoLinker2.theta1, twoLinker2.theta2];
+
+  // target is from mousedown callback
+  twoLinker2.ccdSys.solve(twoLinker2.target, thetas2);
+  twoLinker2.update(thetas2)
+  let posNow2 = twoLinker2.link2.localToWorld(twoLinker2.paddle.position.clone());
+  velTl2.copy(posNow2.clone().sub(posOld2).divideScalar(dt));
+  posOld2.copy(posNow2);
+  console.log('tl1 pos:' + posNow1.x + ' ' + posNow1.z);
+  console.log('tl2 pos:' + posNow2.x + ' ' + posNow2.z);
+  console.log('tl2 v:' + velTl2.x + ' ' + velTl2.z);
+  console.log('puck v:' + velP.x + ' ' + velP.z);
+
+}
+
+function updateArms() {
+  var newTime = clock.getElapsedTime(); // seconds since the program starts
+  var deltaT = newTime - now;
+
+  // linker0
+  var thetas = [twoLinker.theta1, twoLinker.theta2];
+  twoLinker.ccdSys.solve(twoLinker.target, thetas);
+  twoLinker.update(thetas)
+  // how to get end effector position
+  let endNow1 = twoLinker.link2.localToWorld(twoLinker.paddle.position.clone());
+  // how to get end effector velocity
+  velTl1.copy(endNow1.clone().sub(previousEnd).divideScalar(dt));
+
+  // linker1
+  thetas = [twoLinker2.theta1, twoLinker2.theta2];
+  twoLinker2.ccdSys.solve(twoLinker2.target, thetas);
+  twoLinker2.update(thetas);
+  // how to get end effector position
+  let endNow2 = twoLinker2.link2.localToWorld(twoLinker2.paddle.position.clone());
+  // how to get end effector velocity
+  velTl2.copy(endNow2.clone().sub(previousEnd2).divideScalar(dt));
+
+  now = newTime;
+  previousEnd.copy(endNow1);
+  previousEnd2.copy(endNow2);
+}
+
+
+function render() {
+  renderer.render(scene, camera);
+}
+
+function onDocumentMouseDown(event) {
+
+  // event.preventDefault();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // find intersections
+  raycaster.setFromCamera(mouse, camera);
+  var intersects = raycaster.intersectObjects(pickables);
+
+  if (intersects.length > 0) {
+    //puck.position.copy(intersects[0].point);
+    //twoLinker.target.copy (intersects[0].point);
+    // this is not enough ...
+
+    //twoLinker.target.copy ( twoLinkArm.worldToLocal (puck.position.clone()) ) 
+
+    twoLinker.target.copy(twoLinkArm.worldToLocal(intersects[0].point));
+    //twoLinker.target.copy(intersects[0].point);
+
+    //twoLinker2.target.copy ( twoLinkArm2.worldToLocal (puck.position.clone()) )  
+  }
+}
+
+function collision_wall() {
+
+  var endx = 100 - r;
+  var endz = field_len / 2 - r;
+
+  if (puck.position.x >= endx) {
+    velP.x *= -1;
+    puck.position.x = endx;
+    collisionsound.play();
+  }
+  if (puck.position.x <= -(endx)) {
+    velP.x *= -1;
+    puck.position.x = -(endx);
+    collisionsound.play();
+  }
+  if (puck.position.z >= endz) {
+    velP.z *= -1;
+    puck.position.z = endz;
+    collisionsound.play();
+  }
+  if (puck.position.z <= -(endz)) {
+    velP.z *= -1;
+    puck.position.z = -(endz);
+    collisionsound.play();
+  }
+
+  // collision detection
+  /*for (i = 0; i < walls.length; i++) {
+    let wall = walls[i];
+    if (pos.clone().sub(wall.point).dot(wall.normal) < eps + 10) {
+      var vN = wall.normal.clone().multiplyScalar(velP.dot(wall.normal));
+      var vT = velP.clone().sub(vN);
+      // vel = vT + (- CR).vN
+      velP.copy(vT.add(vN.multiplyScalar(-cR)));
+    }
+  }*/
+}
+
+function physics() {
+
+  collision();
+  collision2();
+  collision_wall();
+  // Euler's method
+  //velP.add (force.clone().multiplyScalar(dt));
+  pos = puck.position.clone();
+  pos.add(velP.clone().multiplyScalar(dt));
+  puck.position.copy(pos);
+
+  ///
+
+}
+
+function collision() {
+
+  var r1 = twoLinker.link2.localToWorld(twoLinker.paddle.position.clone());
+  var r2 = puck.position.clone();
+  var d = Math.sqrt((r2.x - r1.x) * (r2.x - r1.x) + (r2.z - r1.z) * (r2.z - r1.z));
+
+  //console.log('r1: '+r1.x+' '+r1.z);
+  //console.log('r2: '+r2.x+' '+r2.z);
+  //console.log('d:'+d+' rad: '+puck.radius);
+
+  if (d <= r * 2) {
+    collisionsound.play();
+
+    var m1 = m;
+    var m2 = m;
+    var v = velTl1.clone().sub(velP.clone());
+    var x = r2.sub(r1);
+    var vT = velTl1.clone().sub(x.multiplyScalar(2 * m1 / (m1 + m2)).multiplyScalar(v.dot(x)).multiplyScalar(1 / (d * d)));
+
+    var t = (r2.sub(r1)).normalize();
+    var d = r * 2 - Math.abs(d);
+
+    //twoLinker.paddle.position.copy(r1.sub(t.multiplyScalar(d / 2)));
+    //puck.position.copy(r2.add(t.multiplyScalar(d / 2)));
+    velP.copy(vT);
+  }
+}
+
+function collision2() {
+  var r1 = twoLinker2.link2.localToWorld(twoLinker2.paddle.position.clone());
+  var r2 = puck.position.clone();
+  var d = Math.sqrt((r2.x - r1.x) * (r2.x - r1.x) + (r2.z - r1.z) * (r2.z - r1.z));
+
+  if (d <= 2 * r) {
+    collisionsound.play();
+
+    var m1 = m;
+    var m2 = m;
+    var v = velTl2.clone().sub(velP.clone());
+    var x = r2.sub(r1);
+    var vT = velTl2.clone().sub(x.multiplyScalar(2 * m1 / (m1 + m2)).multiplyScalar(v.dot(x)).multiplyScalar(1 / (d * d)));
+
+    var t = (r2.sub(r1)).normalize();
+    var d = r * 2 - Math.abs(d);
+
+    //twoLinker2.paddle.position.copy(r1.sub(t.multiplyScalar(d / 2)));
+    //puck.position.copy(r2.add(t.multiplyScalar(d / 2)));
+    //velP.copy(vT);
+    velP.z *= -1;
+
+  }
+}
+
+function result() {
+  var endz = field_len / 2 - r;
+  if (puck.position.z >= endz && puck.position.x <= 1.5 * r && puck.position.x >= (-1.5) * r) {
+    ais++;
+    alert("你輸了...\n你的得分: "+ps+"\n電腦的得分: "+ais);
+    velP.x = 0;
+    velP.z = 0;
+    puck.position.x = 0;
+    puck.position.z = 50;
+  }
+  if (puck.position.z <= -(endz) && puck.position.x <= 1.5 * r && puck.position.x >= (-1.5) * r) {
+    ps++;
+    alert("你贏了！\n你的得分: "+ps+"\n電腦的得分: "+ais);
+    velP.x = 0;
+    velP.z = 0;
+    puck.position.x = 0;
+    puck.position.z = 50;
+  }
+
+}
+
+</script>
+
+</body>
+
+
+</html>
