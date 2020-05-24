@@ -407,6 +407,12 @@ function animate() {
 		$('#obsPos').text ('OBS: [' + obsPos.x.toFixed(2) + ', ' + obsPos.z.toFixed(2) + ']');
 	else 
 	    $('#obsPos').text (' '); // nothing to show
+	
+	for(let i=0; i<ags.length; i++){
+		ags[i].update(0.01);
+		ags[i].setTarget(target.pos);
+		target.newPos(ags[i].getPos());
+	}
 
 }
 
