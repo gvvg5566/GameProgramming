@@ -119,10 +119,10 @@ class Agent {
     this.target = new THREE.Vector3();
     this.vel = new THREE.Vector3();
     this.force = new THREE.Vector3();
-    this.size = 0.3; // half width
+    this.size = 3; // half width
     this.mesh = agentMesh(c);
-    this.MAXSPEED = 25;
-    this.ARRIVAL_R = 0.05;
+    this.MAXSPEED = 100;
+    this.ARRIVAL_R = 30;
     //this.nbhd = [];
 
     // for orientable agent
@@ -142,8 +142,8 @@ class Agent {
     let minDis = obs[0].center.distanceTo(this.pos);
     let minIndex = 0;
 
-    const REACH = 2;
-    const K = 70;
+    const REACH = 80;
+    const K = 85;
     
     for (let i = 1; i < obs.length; i++) {
 
@@ -400,7 +400,7 @@ function animate() {
 	arToolkitContext.update( arToolkitSource.domElement )
 
 	renderer.render (scene, camera);
-	stats.update();
+	stats.();
 
 	let obsPos =  markerKanji.position.clone().sub (markerHiro.position)
 	if (markerHiro.visible === true && markerKanji.visible === true) 
