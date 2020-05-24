@@ -299,12 +299,14 @@ function addMarkerKanji () {
 		 patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji'
 	})
 	
+	/*
 	plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
 		transparent: true,
 		opacity: 0.5,
 		visible: true
 	}));
 	markerRootKanji.add(plane);
+	*/
 
         
 	obs[0] = new Obstacle(new THREE.Vector3(50 / 240, 0, 50 / 240), 20 / 240);
@@ -339,7 +341,7 @@ function animate() {
 	for(let i=0; i<ags.length; i++){
 		ags[i].update(0.01);
 		ags[i].setTarget(target.pos);
-		//target.newPos(ags[i].getPos());
+		target.newPos(ags[i].getPos());
 	}
 
 }
