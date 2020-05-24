@@ -143,7 +143,7 @@ class Agent {
     let minIndex = 0;
 
     const REACH = 2;
-    const K = 70;
+    const K = 7;
     
     for (let i = 1; i < obs.length; i++) {
 
@@ -155,6 +155,7 @@ class Agent {
       }
       
     }
+	  
     let point = obs[minIndex].center.clone().sub(this.pos);
     let proj = point.dot(vhat);
 
