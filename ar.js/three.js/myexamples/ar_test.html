@@ -301,16 +301,6 @@ function init() {
 		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
 	})
 
-	// ... 障礙物
-	markerKanji = addMarkerKanji();
-	scene.add (markerKanji);	
-	
-	stats = new Stats();
-	document.body.appendChild( stats.dom );
-}
-
-// 圓柱障礙物
-function addMarkerKanji () {
 	let markerRootKanji = new THREE.Group();
 	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRootKanji, {
 		type : 'pattern',
@@ -336,7 +326,10 @@ function addMarkerKanji () {
 	ags[1].setTarget(target.getPos());
 	markerRootKanji.add(ags[0].mesh);
 	
-	return markerRootKanji;
+	scene.add (markerKanji);
+	
+	stats = new Stats();
+	document.body.appendChild( stats.dom );
 }
 
 function animate() {
