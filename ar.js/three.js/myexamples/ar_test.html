@@ -34,7 +34,18 @@ var obs = [];
 
 var lenght = 240;
 var height = 0.1;
-var radius = 10;
+var radius = 0.1;
+
+function randomPos() {
+  let pos = new THREE.Vector3(Math.floor(Math.random()*2)-2, 0, Math.floor(Math.random()*2)-2);
+    for (let i = 0; i < obs.length; i++) {
+      if (pos.distanceTo(obs[i].getPos()) < 0.3 {
+        //console.log("check: "+pos.distanceTo(obs[i].getPos()));
+        return randomPos();
+      }
+   }
+  return pos;
+}
 
 class Obstacle {
   constructor(center, size) {
@@ -53,6 +64,45 @@ class Obstacle {
   
   getSize(){
     return this.size;
+  }
+}
+
+class Target {
+  constructor() {
+    
+    this.pos = randomPos();
+    this.prePos = this.pos;
+ 
+    let loader = new THREE.TextureLoader();
+    loader.crossOrigin = ""
+    let tex = loader.load("https://i.imgur.com/GmthNU8.png");
+    this.mesh = new THREE.Mesh(new THREE.CircleGeometry(radius, 1), new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true
+    }));
+    this.mesh.rotation.x = -Math.PI / 2;
+    this.mesh.position.copy(this.pos);
+    this.mesh.position.y = 0.15;
+    //scene.add(this.mesh);
+  }
+
+  setPos() {
+    this.pos.copy(randomPos());
+    if(this.pos == this.prePos){
+      this.pos.copy(randomPos());
+    }
+    this.prePos.copy(this.pos);
+    this.target.position.copy(this.pos);
+  }
+
+  getPos() {
+    return this.pos;
+  }
+
+  newPos(aPos) {
+    if (this.pos.distanceTo(aPos) < 10) {
+      this.setPos();
+    }
   }
 }
 
@@ -188,6 +238,9 @@ function addMarkerKanji () {
 	for(let i=0; i<obs.length; i++){
 		markerRootKanji.add(obs[i].mesh);
 	}
+	
+	target = new Target();
+	markerRootKanji.add(target.mesh);
 	
 	return markerRootKanji;
 }
