@@ -20,44 +20,43 @@ body {
 </head>
 
 <body> 
+
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <!-- three.js library -->
 <script src="https://mliton165.github.io/GameProgramming/ar.js/three.js/examples/vendor/three.js/build/three.min.js"></script>
 <script src="https://mliton165.github.io/GameProgramming/ar.js/three.js/examples/vendor/three.js/examples/js/libs/stats.min.js"></script>
-<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script> 
 
 <!-- ar.js -->
-<script src="https://mliton165.github.io/GameProgramming/ar.js/three.js/build/ar.js"> </script>
-<script>THREEx.ArToolkitContext.baseURL = 'https://mliton165.github.io/'</script>
+<script src="https://mliton165.github.io/GameProgramming/ar.js/three.js//build/ar.js"></script>
+<script>THREEx.ArToolkitContext.baseURL = 'https://mliton165.github.io/GameProgramming/ar.js/'</script>
 
-<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
-	<a href="https://github.com/jeromeetienne/AR.js/" target="_blank">AR.js</a> - three.js mobile performance
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+<div style='font-size:2em;color:yellow; position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
+	<a href="https://github.com/jeromeetienne/AR.js/" target="_blank">AR.js</a> 
 	<br/>
-	init-animate format<br>
-	smoothed control
+	Initialize both markers, but show them in controlled fashion
+	<p id='obsPos'></p>
 </div>
 
 <script>
-var renderer, scene, camera, stats;
-var arToolkitSource, arToolkitContext;
-var smoothedControls, markerRoot, smoothedRoot;
+
+var camera, scene, renderer;
 var puck;
+
 var raycaster;
 var pickables = [];
 var ags = [];
 var obs = [];
 
-var lenght = 240;
-var height = 1;
-var radius = 10;
+var markerRoot, smoothedRoot, smoothedControls;
 
 function randomPos() {
-  let pos = new THREE.Vector3(((Math.random() * lenght)-lenght/2)/length, 0, ((Math.random() * lenght)-lenght/2)/length);
+  let pos = new THREE.Vector3(((Math.random() * 240)-240)/240, 0, ((Math.random() * 240)-240)/240);
     for (let i = 0; i < obs.length; i++) {
-      if (pos.distanceTo(obs[i].getPos()) < 30) {
-        console.log("check: "+pos.distanceTo(obs[i].getPos()));
+      if (pos.distanceTo(obs[i].getPos()) < 30/240) {
+        //console.log("check: "+pos.distanceTo(obs[i].getPos()));
         return randomPos();
       }
    }
@@ -67,13 +66,12 @@ function randomPos() {
 class Obstacle {
   constructor(center, size) {
     this.center = center.clone();
-    this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(size, size, height, 20),
+    this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(size, size, 1, 20),
       new THREE.MeshBasicMaterial());
     this.mesh.position.copy(center);
-    this.mesh.position.y = height / 2;
+    this.mesh.position.y = 0.5;
     this.size = size;
     //scene.add(this.mesh)
-    //smoothedRoot.add(this.mesh);
   }
   
   getPos(){
@@ -94,15 +92,14 @@ class Target {
     let loader = new THREE.TextureLoader();
     loader.crossOrigin = ""
     let tex = loader.load("https://i.imgur.com/GmthNU8.png");
-    this.mesh = new THREE.Mesh(new THREE.CircleGeometry(radius/length, 20/length), new THREE.MeshBasicMaterial({
+    this.mesh = new THREE.Mesh(new THREE.CircleGeometry(10/240, 20/240), new THREE.MeshBasicMaterial({
       map: tex,
       transparent: true
     }));
-    this.mesh.rotation.x = -Math.PI / 2;
-    this.mesh.position.copy(this.pos);
-    this.mesh.position.y = 0.15;
-    //scene.add(this.mesh);
-    //smoothedRoot.add(this.mesh);
+    this.target.rotation.x = -Math.PI / 2;
+    this.target.position.copy(this.pos);
+    //this.target.position.y = 0.15;
+    //scene.add(this.target);
   }
 
   setPos() {
@@ -119,7 +116,7 @@ class Target {
   }
 
   newPos(aPos) {
-    if (this.pos.distanceTo(aPos) < 10/length) {
+    if (this.pos.distanceTo(aPos) < 10) {
       this.setPos();
     }
   }
@@ -132,17 +129,16 @@ class Agent {
     this.target = new THREE.Vector3();
     this.vel = new THREE.Vector3();
     this.force = new THREE.Vector3();
-    this.size = 3/lenght; // half width
+    this.size = 3/240; // half width
     this.mesh = agentMesh(c);
-    this.MAXSPEED = 100/lenght;
-    this.ARRIVAL_R = 30/lenght;
+    this.MAXSPEED = 75/240;
+    this.ARRIVAL_R = 30/240;
     //this.nbhd = [];
 
     // for orientable agent
     this.angle = 0;
 
-    //scene.add(this.mesh);
-    //smoothedRoot.add(this.mesh);
+    scene.add(this.mesh);
   }
 
   getPos(){
@@ -158,8 +154,8 @@ class Agent {
     let minDis = obs[0].center.distanceTo(this.pos);
     let minIndex = 0;
 
-    const REACH = 80/lenght;
-    const K = 85;
+    const REACH = 50/240;
+    const K = 7;
     
     for (let i = 1; i < obs.length; i++) {
 
@@ -200,7 +196,7 @@ class Agent {
 
     // for orientable agent
     // non PD version
-    if (this.vel.length() > 0.1/length) {
+    if (this.vel.length() > 0.1/240) {
       this.angle = Math.atan2(-this.vel.z, this.vel.x)
       this.mesh.rotation.y = this.angle
     }
@@ -229,10 +225,10 @@ animate();
 function agentMesh(c) {
   // mesh facing +x
   let geometry = new THREE.Geometry();
-  geometry.vertices.push(new THREE.Vector3(10/lenght, 0, 0))
-  geometry.vertices.push(new THREE.Vector3(0, 0, -3/lenght))
-  geometry.vertices.push(new THREE.Vector3(0, 0, 3/lenght))
-  geometry.vertices.push(new THREE.Vector3(0, 3/lenght, 0))
+  geometry.vertices.push(new THREE.Vector3(10/240, 0, 0))
+  geometry.vertices.push(new THREE.Vector3(0, 0, -3/240))
+  geometry.vertices.push(new THREE.Vector3(0, 0, 3/240))
+  geometry.vertices.push(new THREE.Vector3(0, 3/240, 0))
 
   geometry.faces.push(new THREE.Face3(0, 3, 2));
   geometry.faces.push(new THREE.Face3(0, 2, 1));
@@ -248,7 +244,13 @@ function agentMesh(c) {
 }
 
 function init() {
+	// https://stackoverflow.com/questions/9038625/detect-if-device-is-ios?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+	let _iOSDevice = !!navigator.platform.match(/iPhone|iPod|iPad/);
 
+	console.log ('iOS: ' + _iOSDevice)
+
+
+	// init renderer
 	renderer	= new THREE.WebGLRenderer({
 		// antialias	: true,
 		alpha: true
@@ -277,16 +279,7 @@ function init() {
 	////////////////////////////////////////////////////////////////////////////////
 
 	arToolkitSource = new THREEx.ArToolkitSource({
-		// to read from the webcam 
 		sourceType : 'webcam',
-
-		// to read from an image
-		// sourceType : 'image',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',		
-
-		// to read from a video
-		// sourceType : 'video',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',		
 	})
 
 	arToolkitSource.init(function onReady(){
@@ -297,14 +290,20 @@ function init() {
 	window.addEventListener('resize', function(){
 		onResize()
 	})
+	
+	function onResize(){
+		arToolkitSource.onResize()	
+		arToolkitSource.copySizeTo(renderer.domElement)	
+		if( arToolkitContext.arController !== null ){
+			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)	
+		}	
+	}
 	////////////////////////////////////////////////////////////////////////////////
 	//          initialize arToolkitContext
 	////////////////////////////////////////////////////////////////////////////////
 	
-
-	// create atToolkitContext
 	arToolkitContext = new THREEx.ArToolkitContext({
-		cameraParametersUrl: THREEx.ArToolkitContext.baseURL + "GameProgramming/ar.js/data/data/camera_para.dat",
+		cameraParametersUrl: THREEx.ArToolkitContext.baseURL + '/data/data/camera_para.dat',
 		detectionMode: 'mono',
 		maxDetectionRate: 30,
 		canvasWidth: 80*3,
@@ -315,17 +314,16 @@ function init() {
 		// copy projection matrix to camera
 		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
 	})
-	
 	////////////////////////////////////////////////////////////////////////////////
 	//          Create a ArMarkerControls
 	////////////////////////////////////////////////////////////////////////////////
 	
-	markerRoot = new THREE.Group
-	scene.add(markerRoot)
+	let markerRoot = new THREE.Group();
 	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
 		type : 'pattern',
-		patternUrl : THREEx.ArToolkitContext.baseURL + "GameProgramming/ar.js/data/data/patt.hiro"
+		 patternUrl : THREEx.ArToolkitContext.baseURL + '/data/data/patt.kanji'
 	})
+	scene.add(markerRoot)
 
 	// build a smoothedControls
 	smoothedRoot = new THREE.Group()
@@ -341,63 +339,53 @@ function init() {
 	//		add an object in the scene
 	//////////////////////////////////////////////////////////////////////////////////
 
-	let arWorldRoot = smoothedRoot
+	//let arWorldRoot = smoothedRoot
 
 	stats = new Stats();
 	document.body.appendChild( stats.dom );
-	
-	
 
   /////////////////////////////////////////////////////////////////////
-  plane = new THREE.Group()
-  plane = new THREE.Mesh(new THREE.PlaneGeometry(lenght/length, lenght/length), new THREE.MeshBasicMaterial({
+  plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
     transparent: true,
     opacity: 0.5,
     visible: true
   }));
-  //scene.add(plane);
-  arWorldRoot.add(plane);
+  smoothedRoot.add(plane);
   //plane.material.visible = false
   plane.rotation.x = -Math.PI / 2;
-  pickables = [plane];
 
   raycaster = new THREE.Raycaster();
-  //document.addEventListener('mousedown', onDocumentMouseDown, false);
   ////////////////////////
 
-  obs[0] = new Obstacle(new THREE.Vector3(50/length, 0, 50/length), 20/length);
-  obs[1] = new Obstacle(new THREE.Vector3(-50/length, 0, 50/length), 20/length);
-  obs[2] = new Obstacle(new THREE.Vector3(50/length, 0, -50/length), 20/length);
-  obs[3] = new Obstacle(new THREE.Vector3(-50/length, 0, -50/length), 20/length);
-  for(let i=0; i<obs.length; i++){
-    arWorldRoot.add(obs[i].mesh);
-  }
-  
+  obs[0] = new Obstacle(new THREE.Vector3(50/240, 0, 50/240), 20/240);
+  obs[1] = new Obstacle(new THREE.Vector3(-50/240, 0, 50/240), 20/240);
+  obs[2] = new Obstacle(new THREE.Vector3(50/240, 0, -50/240), 20/240);
+  obs[3] = new Obstacle(new THREE.Vector3(-50/240, 0, -50/240), 20/240);
+  smoothedRoot.add(obs[0].mesh);
+  smoothedRoot.add(obs[1].mesh);
+  smoothedRoot.add(obs[2].mesh);
+  smoothedRoot.add(obs[3].mesh);
 
   ags[0] = new Agent(randomPos(), 'blue');
   ags[1] = new Agent(randomPos(), 'red');
-  ags[1].MAXSPEED = 90;
-  ags[1].ARRIVAL_R = 40;
-  for(let i=0; i<ags.length; i++){
-    arWorldRoot.add(ags[i].mesh);
-  }
+  smoothedRoot.add(ags[0].mesh);
+  smoothedRoot.add(ags[1].mesh);
 
   target = new Target();
-  arWorldRoot.add(target.mesh);
+  smoothedRoot.add(target.mesh);
+
 }
 
-
 function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-  stats.update();
-  
-  if( arToolkitSource.ready === false )	return
-  arToolkitContext.update( arToolkitSource.domElement )
-  //markerHiro.children[0].rotation.x += 0.1;
+  requestAnimationFrame (animate);
+	renderer.render (scene, camera);
+	stats.update();
+	
+	if( arToolkitSource.ready === false )	return
 
-  smoothedControls.update (markerRoot)
-  //smoothedRoot.children[1].rotation.x += 0.1;
+	arToolkitContext.update( arToolkitSource.domElement )
+
+	smoothedControls.update (markerRoot)
   
   for(let i=0; i<ags.length; i++){
     ags[i].update(0.01);
