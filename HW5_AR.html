@@ -41,15 +41,13 @@ body {
 
 <script>
 
-var camera, scene, renderer;
-var puck;
-
+var renderer, scene, camera, stats;
+var arToolkitSource, arToolkitContext;
+var markerRoot, smoothedRoot, smoothedControls;
 var raycaster;
 var pickables = [];
 var ags = [];
 var obs = [];
-
-var markerRoot, smoothedRoot, smoothedControls;
 
 function randomPos() {
   let pos = new THREE.Vector3(((Math.random() * 240) - 240) / 240, 0, ((Math.random() * 240) - 240) / 240);
