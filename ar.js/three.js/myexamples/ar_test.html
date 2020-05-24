@@ -146,12 +146,19 @@ function init() {
 	// AR base ... steer世界的原點
 	markerHiro = addMarkerHiro();
 	scene.add (markerHiro); // hide at first
-
+	
+	//plane = new THREE.Group();
+	plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
+		transparent: true,
+		opacity: 0.5,
+		visible: true
+	}));
+	scene.add(plane);
         
-	obs[0] = new Obstacle(new THREE.Vector3(50, 0, 50), 20);
-        obs[1] = new Obstacle(new THREE.Vector3(-50, 0, 50), 20);
-        obs[2] = new Obstacle(new THREE.Vector3(50, 0, -50), 20);
-        obs[3] = new Obstacle(new THREE.Vector3(-50, 0, -50), 20);
+	obs[0] = new Obstacle(new THREE.Vector3(0.5, 0, 0.5), 0.2);
+        obs[1] = new Obstacle(new THREE.Vector3(-0.5, 0, 0.5), 0.2);
+        obs[2] = new Obstacle(new THREE.Vector3(0.5, 0, -0.5), 0.2);
+        obs[3] = new Obstacle(new THREE.Vector3(-0.5, 0, -0.5), 0.2);
 	
 	stats = new Stats();
 	document.body.appendChild( stats.dom );
