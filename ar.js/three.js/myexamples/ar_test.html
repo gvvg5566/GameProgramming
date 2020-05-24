@@ -313,8 +313,8 @@ function init() {
 	scene.add (markerKanji);
 	
 	// AR base ... steer世界的原點
-	markerHiro = addMarkerHiro();
-	scene.add (markerHiro); // hide at first
+	//markerHiro = addMarkerHiro();
+	//scene.add (markerHiro); // hide at first
 	
 	
 	stats = new Stats();
@@ -401,12 +401,6 @@ function animate() {
 
 	renderer.render (scene, camera);
 	stats.update();
-
-	let obsPos =  markerKanji.position.clone().sub (markerHiro.position)
-	if (markerHiro.visible === true && markerKanji.visible === true) 
-		$('#obsPos').text ('OBS: [' + obsPos.x.toFixed(2) + ', ' + obsPos.z.toFixed(2) + ']');
-	else 
-	    $('#obsPos').text (' '); // nothing to show
 	
 	for(let i=0; i<ags.length; i++){
 		ags[i].update(0.01);
