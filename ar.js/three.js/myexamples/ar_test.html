@@ -49,9 +49,9 @@ function randomPos() {
 
 class Obstacle {
   constructor(center, size) {
+    let material = new THREE.MeshNormalMaterial({opacity:0.4});
     this.center = center.clone();
-    this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(size, size, height, 20),
-      new THREE.MeshBasicMaterial());
+    this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(size, size, height, 20), material);
     this.mesh.position.copy(center);
     this.mesh.position.y = height / 2;
     this.size = size;
