@@ -316,13 +316,6 @@ function addMarkerKanji () {
 		type : 'pattern',
 		 patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji'
 	})
-	
-	plane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({
-		transparent: true,
-		opacity: 0.5,
-		visible: true
-	}));
-	//markerRootKanji.add(plane);
         
 	obs[0] = new Obstacle(new THREE.Vector3(0.5, 0, 0.5), 0.2);
         obs[1] = new Obstacle(new THREE.Vector3(-0.5, 0, 0.5), 0.2);
@@ -336,11 +329,12 @@ function addMarkerKanji () {
 	markerRootKanji.add(target.mesh);
 	
 	ags[0] = new Agent(randomPos(), 'blue');
+	ags[0].setTarget(target.getPos());
+	markerRootKanji.add(ags[0].mesh);
+	
 	ags[1] = new Agent(randomPos(), 'red');
-	for(let i=0; i<ags.length; i++){
-		ags[i].setTarget(target.getPos());
-		markerRootKanji.add(ags[i].mesh);
-	}
+	ags[1].setTarget(target.getPos());
+	markerRootKanji.add(ags[0].mesh);
 	
 	return markerRootKanji;
 }
