@@ -264,16 +264,7 @@ function init() {
 	////////////////////////////////////////////////////////////////////////////////
 
 	arToolkitSource = new THREEx.ArToolkitSource({
-		// to read from the webcam 
 		sourceType : 'webcam',
-
-		// to read from an image
-		// sourceType : 'image',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',		
-
-		// to read from a video
-		// sourceType : 'video',
-		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',		
 	})
 
 	arToolkitSource.init(function onReady(){
@@ -284,6 +275,7 @@ function init() {
 	window.addEventListener('resize', function(){
 		onResize()
 	})
+	
 	function onResize(){
 		arToolkitSource.onResize()	
 		arToolkitSource.copySizeTo(renderer.domElement)	
@@ -310,38 +302,19 @@ function init() {
 
 	// ... 障礙物
 	markerKanji = addMarkerKanji();
-	scene.add (markerKanji);
-	
-	// AR base ... steer世界的原點
-	//markerHiro = addMarkerHiro();
-	//scene.add (markerHiro); // hide at first
-	
+	scene.add (markerKanji);	
 	
 	stats = new Stats();
 	document.body.appendChild( stats.dom );
-
-
 }
 
-	
-
-// 圓柱障礙物	
+// 圓柱障礙物
 function addMarkerKanji () {
 	let markerRootKanji = new THREE.Group();
 	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRootKanji, {
 		type : 'pattern',
 		 patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji'
 	})
-
-	// 1個與marker一樣大的圓柱
-	var geometry	=  new THREE.CylinderGeometry(0.5,0.5,0.4, 20);
-	
-	let material = new THREE.MeshNormalMaterial({opacity:0.4});
-
-	let mesh	= new THREE.Mesh( geometry, material );
-	mesh.position.y	= geometry.parameters.height/2;		
-	
-	//markerRootKanji.add (mesh);
 	
 	plane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({
 		transparent: true,
@@ -370,34 +343,13 @@ function addMarkerKanji () {
 	return markerRootKanji;
 }
 
-// steer 原點
-function addMarkerHiro(){
-	let markerRoot = new THREE.Group()
-
-	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
-		type : 'pattern',
-		patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.hiro'
-	})
-
-	var axes = new THREE.Group();
-	let xAxis = new THREE.Mesh (new THREE.BoxGeometry (1, 0.1,0.1), new THREE.MeshBasicMaterial({color:'red', opacity:0.4}));
-	let zAxis = new THREE.Mesh (new THREE.BoxGeometry (0.1,0.1,1), new THREE.MeshBasicMaterial({color:'blue',opacity:0.4}));
-	axes.add (xAxis, zAxis);
-	xAxis.position.set (0.5, 0.05, 0);
-	zAxis.position.set (0, 0.05, 0.5);
-	
-	
-	//markerRoot.add (axes);
-		
-	return markerRoot;
-}	
-
-
 function animate() {
 	requestAnimationFrame (animate);
 	
 	if( arToolkitSource.ready === false )	return
 	arToolkitContext.update( arToolkitSource.domElement )
+	
+	markerHiro.children[0].rotation.x += 0.1;
 
 	renderer.render (scene, camera);
 	stats.update();
