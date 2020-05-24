@@ -39,7 +39,7 @@ var radius = 0.1;
 function randomPos() {
   let pos = new THREE.Vector3(Math.floor(Math.random()*2)-2, 0, Math.floor(Math.random()*2)-2);
     for (let i = 0; i < obs.length; i++) {
-      if (pos.distanceTo(obs[i].getPos()) < 0.3 {
+      if (pos.distanceTo(obs[i].getPos()) < 0.3 ) {
         //console.log("check: "+pos.distanceTo(obs[i].getPos()));
         return randomPos();
       }
