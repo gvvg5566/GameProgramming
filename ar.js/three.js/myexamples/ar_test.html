@@ -337,6 +337,7 @@ function addMarkerKanji () {
 	ags[0] = new Agent(randomPos(), 'blue');
 	ags[1] = new Agent(randomPos(), 'red');
 	for(let i=0; i<ags.length; i++){
+		ags[i].setTarget(target.getPos());
 		markerRootKanji.add(ags[i].mesh);
 	}
 	
@@ -356,7 +357,7 @@ function animate() {
 	
 	for(let i=0; i<ags.length; i++){
 		ags[i].update(0.01);
-		ags[i].setTarget(target.pos);
+		ags[i].setTarget(target.getPos());
 		target.newPos(ags[i].getPos());
 	}
 
