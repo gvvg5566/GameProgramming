@@ -75,7 +75,7 @@ class Obstacle {
     this.mesh.position.y = height / 2;
     this.size = size;
     //scene.add(this.mesh)
-    smoothedRoot.add(this.mesh);
+    //smoothedRoot.add(this.mesh);
   }
   
   getPos(){
@@ -104,7 +104,7 @@ class Target {
     this.mesh.position.copy(this.pos);
     this.mesh.position.y = 0.15;
     //scene.add(this.mesh);
-    smoothedRoot.add(this.mesh);
+    //smoothedRoot.add(this.mesh);
   }
 
   setPos() {
@@ -144,7 +144,7 @@ class Agent {
     this.angle = 0;
 
     //scene.add(this.mesh);
-    smoothedRoot.add(this.mesh);
+    //smoothedRoot.add(this.mesh);
   }
 
   getPos(){
@@ -371,13 +371,21 @@ function init() {
   obs[1] = new Obstacle(new THREE.Vector3(-50, 0, 50), 20);
   obs[2] = new Obstacle(new THREE.Vector3(50, 0, -50), 20);
   obs[3] = new Obstacle(new THREE.Vector3(-50, 0, -50), 20);
+  for(let i=0; i<obs.length; i++){
+    arWorldRoot.add(obs[i].mesh);
+  }
+  
 
   ags[0] = new Agent(randomPos(), 'blue');
   ags[1] = new Agent(randomPos(), 'red');
   ags[1].MAXSPEED = 90;
   ags[1].ARRIVAL_R = 40;
+  for(let i=0; i<ags.length; i++){
+    arWorldRoot.add(ags[i].mesh);
+  }
 
   target = new Target();
+  arWorldRoot.add(target.mesh);
 }
 
 
