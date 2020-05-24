@@ -141,24 +141,12 @@ function init() {
 
 	// ... 障礙物
 	markerKanji = addMarkerKanji();
-	//scene.add (markerKanji);
+	scene.add (markerKanji);
 	
 	// AR base ... steer世界的原點
 	markerHiro = addMarkerHiro();
 	scene.add (markerHiro); // hide at first
 	
-	//plane = new THREE.Group();
-	plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
-		transparent: true,
-		opacity: 0.5,
-		visible: true
-	}));
-	scene.add(plane);
-        
-	obs[0] = new Obstacle(new THREE.Vector3(0.5, 0, 0.5), 0.2);
-        obs[1] = new Obstacle(new THREE.Vector3(-0.5, 0, 0.5), 0.2);
-        obs[2] = new Obstacle(new THREE.Vector3(0.5, 0, -0.5), 0.2);
-        obs[3] = new Obstacle(new THREE.Vector3(-0.5, 0, -0.5), 0.2);
 	
 	stats = new Stats();
 	document.body.appendChild( stats.dom );
@@ -184,7 +172,19 @@ function addMarkerKanji () {
 	let mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.y	= geometry.parameters.height/2;		
 	
-	markerRootKanji.add (mesh);
+	//markerRootKanji.add (mesh);
+	
+	plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
+		transparent: true,
+		opacity: 0.5,
+		visible: true
+	}));
+	markerRootKanji.add(plane);
+        
+	obs[0] = new Obstacle(new THREE.Vector3(0.5, 0, 0.5), 0.2);
+        obs[1] = new Obstacle(new THREE.Vector3(-0.5, 0, 0.5), 0.2);
+        obs[2] = new Obstacle(new THREE.Vector3(0.5, 0, -0.5), 0.2);
+        obs[3] = new Obstacle(new THREE.Vector3(-0.5, 0, -0.5), 0.2);
 	
 	return markerRootKanji;
 }
