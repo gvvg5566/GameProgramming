@@ -20,86 +20,68 @@
 <script> 
  
 // global variables
-var renderer, scene, camera;
-var stats;
-var markerKanji, markerHiro;
-var arToolKitSource, arToolKitContext;
-
-var raycaster, pickables;
-var showHiro = false;
-var _iOSDevice;
-
+var renderer, scene, camera, stats;
+var arToolkitSource, arToolkitContext;
+var markerRoot, smoothedRoot, smoothedControls;
+var raycaster;
+var pickables = [];
 var ags = [];
 var obs = [];
 
-var lenght = 240;
-var height = 0.1;
-var radius = 0.1;
-
 function randomPos() {
-  let pos = new THREE.Vector3(Math.random() * 2 - 1, 0, Math.random() * 2 - 1);
-    /*for (let i = 0; i < obs.length; i++) {
-      if (pos.distanceTo(obs[i].getPos()) < 0.3) {
-        //console.log("check: "+pos.distanceTo(obs[i].getPos()));
-        return randomPos();
-      }
-   }
-   for (let i = 0; i < ags.length; i++) { 
-      if (pos.distanceTo(ags[i].getPos()) < 0.3) {
-        //console.log("check: "+pos.distanceTo(obs[i].getPos()));
-        return randomPos();
-      }
-   }*/
+  let pos = new THREE.Vector3(((Math.random() * 240) - 240) / 240, 0, ((Math.random() * 240) - 240) / 240);
+  for (let i = 0; i < obs.length; i++) {
+    if (pos.distanceTo(obs[i].getPos()) < 30 / 240) {
+      return randomPos();
+    }
+  }
   return pos;
 }
 
 class Obstacle {
   constructor(center, size) {
-    let material = new THREE.MeshNormalMaterial({opacity:0.4});
     this.center = center.clone();
-    this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(size, size, height, 20), material);
+    this.mesh = new THREE.Mesh(new THREE.CylinderGeometry(size, size, 1, 20),
+      new THREE.MeshBasicMaterial());
     this.mesh.position.copy(center);
-    this.mesh.position.y = height / 2;
+    this.mesh.position.y = 0.5;
     this.size = size;
-    //scene.add(this.mesh)
   }
-  
-  getPos(){
+
+  getPos() {
     return this.center;
   }
-  
-  getSize(){
+
+  getSize() {
     return this.size;
   }
 }
 
 class Target {
   constructor() {
-    
+
     this.pos = randomPos();
-    //this.pos = new THREE.Vector3(0, 0, 0);
     this.prePos = this.pos;
- 
+
     let loader = new THREE.TextureLoader();
     loader.crossOrigin = ""
     let tex = loader.load("https://i.imgur.com/GmthNU8.png");
-    this.mesh = new THREE.Mesh(new THREE.CircleGeometry(radius, 1), new THREE.MeshBasicMaterial({
+    this.mesh = new THREE.Mesh(new THREE.CircleGeometry(10 / 240, 20 / 240), new THREE.MeshBasicMaterial({
       map: tex,
       transparent: true
     }));
     this.mesh.rotation.x = -Math.PI / 2;
     this.mesh.position.copy(this.pos);
-    this.mesh.position.y = 0.15;
-    //scene.add(this.mesh);
+    //this.target.position.y = 0.15;
   }
 
   setPos() {
     this.pos.copy(randomPos());
-    if(this.pos == this.prePos){
+    if (this.pos == this.prePos) {
       this.pos.copy(randomPos());
     }
     this.prePos.copy(this.pos);
-    this.target.position.copy(this.pos);
+    this.mesh.position.copy(this.pos);
   }
 
   getPos() {
@@ -111,25 +93,26 @@ class Target {
       this.setPos();
     }
   }
+
 }
-	
+
 class Agent {
   constructor(pos, c) {
     this.pos = pos.clone();
     this.target = new THREE.Vector3();
     this.vel = new THREE.Vector3();
     this.force = new THREE.Vector3();
-    this.size = 0.03; // half width
+    this.size = 3 / 240; // half width
     this.mesh = agentMesh(c);
-    this.MAXSPEED = 0.1;
-    this.ARRIVAL_R = 0.3;
+    this.MAXSPEED = 75 / 240;
+    this.ARRIVAL_R = 30 / 240;
     //this.nbhd = [];
 
     // for orientable agent
     this.angle = 0;
   }
 
-  getPos(){
+  getPos() {
     return this.pos;
   }
 
@@ -138,24 +121,23 @@ class Agent {
 
     // collision
     let vhat = this.vel.clone().normalize();
-    
+
     let minDis = obs[0].center.distanceTo(this.pos);
     let minIndex = 0;
 
-    const REACH = 0.2;
+    const REACH = 50 / 240;
     const K = 7;
-    
+
     for (let i = 1; i < obs.length; i++) {
 
       let dis = obs[i].center.distanceTo(this.pos);
 
       if (dis < minDis) {
-          minDis = dis;
-          minIndex = i;
+        minDis = dis;
+        minIndex = i;
       }
-      
+
     }
-	  
     let point = obs[minIndex].center.clone().sub(this.pos);
     let proj = point.dot(vhat);
 
@@ -185,7 +167,7 @@ class Agent {
 
     // for orientable agent
     // non PD version
-    if (this.vel.length() > 0.1) {
+    if (this.vel.length() > 0.1 / 240) {
       this.angle = Math.atan2(-this.vel.z, this.vel.x)
       this.mesh.rotation.y = this.angle
     }
@@ -203,6 +185,7 @@ class Agent {
     // seek
     this.force.copy(this.targetInducedForce(this.target));
   }
+
 }
 
 init();
@@ -211,10 +194,10 @@ animate();
 function agentMesh(c) {
   // mesh facing +x
   let geometry = new THREE.Geometry();
-  geometry.vertices.push(new THREE.Vector3(0.1, 0, 0))
-  geometry.vertices.push(new THREE.Vector3(0, 0, -0.03))
-  geometry.vertices.push(new THREE.Vector3(0, 0, 0.03))
-  geometry.vertices.push(new THREE.Vector3(0, 0.03, 0))
+  geometry.vertices.push(new THREE.Vector3(10 / 240, 0, 0))
+  geometry.vertices.push(new THREE.Vector3(0, 0, -3 / 240))
+  geometry.vertices.push(new THREE.Vector3(0, 0, 3 / 240))
+  geometry.vertices.push(new THREE.Vector3(0, 3 / 240, 0))
 
   geometry.faces.push(new THREE.Face3(0, 3, 2));
   geometry.faces.push(new THREE.Face3(0, 2, 1));
@@ -301,16 +284,33 @@ function init() {
 		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
 	})
 
+	// ... 障礙物
+	markerKanji = addMarkerKanji();
+	scene.add (markerKanji);
+	
+	stats = new Stats();
+	document.body.appendChild( stats.dom );
+}
+
+function addMarkerKanji () {
 	let markerRootKanji = new THREE.Group();
 	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRootKanji, {
 		type : 'pattern',
 		 patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji'
 	})
+	
+	plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
+		transparent: true,
+		opacity: 0.5,
+		visible: true
+	}));
+	markerRootKanji.add(plane);
+
         
-	obs[0] = new Obstacle(new THREE.Vector3(0.5, 0, 0.5), 0.2);
-        obs[1] = new Obstacle(new THREE.Vector3(-0.5, 0, 0.5), 0.2);
-        obs[2] = new Obstacle(new THREE.Vector3(0.5, 0, -0.5), 0.2);
-        obs[3] = new Obstacle(new THREE.Vector3(-0.5, 0, -0.5), 0.2);
+	obs[0] = new Obstacle(new THREE.Vector3(50 / 240, 0, 50 / 240), 20 / 240);
+        obs[1] = new Obstacle(new THREE.Vector3(-50 / 240, 0, 50 / 240), 20 / 240);
+        obs[2] = new Obstacle(new THREE.Vector3(50 / 240, 0, -50 / 240), 20 / 240);
+        obs[3] = new Obstacle(new THREE.Vector3(-50 / 240, 0, -50 / 240), 20 / 240);
 	for(let i=0; i<obs.length; i++){
 		markerRootKanji.add(obs[i].mesh);
 	}
@@ -319,17 +319,12 @@ function init() {
 	markerRootKanji.add(target.mesh);
 	
 	ags[0] = new Agent(randomPos(), 'blue');
-	ags[0].setTarget(target.getPos());
-	markerRootKanji.add(ags[0].mesh);
-	
 	ags[1] = new Agent(randomPos(), 'red');
-	ags[1].setTarget(target.getPos());
-	markerRootKanji.add(ags[1].mesh);
+	for(let i=0; i<ags.length; i++){
+		markerRootKanji.add(ags[i].mesh);
+	}
 	
-	scene.add (markerRootKanji);
-	
-	stats = new Stats();
-	document.body.appendChild( stats.dom ); 
+	return markerRootKanji;
 }
 
 function animate() {
@@ -341,13 +336,11 @@ function animate() {
 	renderer.render (scene, camera);
 	stats.update();
 	
-	ags[0].update(0.01);
-	ags[0].setTarget(target.getPos());
-	target.newPos(ags[0].getPos());
-	
-	ags[1].update(0.01);
-	ags[1].setTarget(target.getPos());
-	target.newPos(ags[1].getPos());
+	for(let i=0; i<ags.length; i++){
+		ags[i].update(0.01);
+		ags[i].setTarget(target.pos);
+		target.newPos(ags[i].getPos());
+	}
 
 }
 
