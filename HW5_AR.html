@@ -20,8 +20,6 @@ body {
 </head>
 
 <body> 
-
-<div id="info">Agent (Seek, Arrival, Collision)</div>
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <!-- three.js library -->
@@ -121,7 +119,7 @@ class Target {
   }
 
   newPos(aPos) {
-    if (this.pos.distanceTo(aPos) < 10) {
+    if (this.pos.distanceTo(aPos) < 10/length) {
       this.setPos();
     }
   }
