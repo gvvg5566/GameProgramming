@@ -19,8 +19,8 @@ body {
 </style>
 </head>
 
-<body>  
-  
+<body> 
+
 <!DOCTYPE html>
 <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 <!-- three.js library -->
@@ -320,6 +320,7 @@ function init() {
   // build a smoothedControls
   smoothedRoot = new THREE.Group()
   scene.add(smoothedRoot)
+
   smoothedControls = new THREEx.ArSmoothedControls(smoothedRoot, {
     lerpPosition: 0.4,
     lerpQuaternion: 0.3,
@@ -330,7 +331,7 @@ function init() {
   //		add an object in the scene
   //////////////////////////////////////////////////////////////////////////////////
 
-  //let arWorldRoot = smoothedRoot
+  let arWorldRoot = smoothedRoot
 
   stats = new Stats();
   document.body.appendChild(stats.dom);
@@ -341,7 +342,7 @@ function init() {
     opacity: 0.5,
     visible: true
   }));
-  smoothedRoot.add(plane);
+  arWorldRoot.add(plane);
   //plane.material.visible = false
   plane.rotation.x = -Math.PI / 2;
 
@@ -352,18 +353,18 @@ function init() {
   obs[1] = new Obstacle(new THREE.Vector3(-50 / 240, 0, 50 / 240), 20 / 240);
   obs[2] = new Obstacle(new THREE.Vector3(50 / 240, 0, -50 / 240), 20 / 240);
   obs[3] = new Obstacle(new THREE.Vector3(-50 / 240, 0, -50 / 240), 20 / 240);
-  smoothedRoot.add(obs[0].mesh);
-  smoothedRoot.add(obs[1].mesh);
-  smoothedRoot.add(obs[2].mesh);
-  smoothedRoot.add(obs[3].mesh);
+  arWorldRoot.add(obs[0].mesh);
+  arWorldRoot.add(obs[1].mesh);
+  arWorldRoot.add(obs[2].mesh);
+  arWorldRoot.add(obs[3].mesh);
 
   ags[0] = new Agent(randomPos(), 'blue');
   ags[1] = new Agent(randomPos(), 'red');
-  smoothedRoot.add(ags[0].mesh);
-  smoothedRoot.add(ags[1].mesh);
+  arWorldRoot.add(ags[0].mesh);
+  arWorldRoot.add(ags[1].mesh);
 
   target = new Target();
-  smoothedRoot.add(target.mesh);
+  arWorldRoot.add(target.mesh);
 
 }
 
