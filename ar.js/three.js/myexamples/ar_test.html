@@ -355,6 +355,12 @@ function addMarkerKanji () {
 	target = new Target();
 	markerRootKanji.add(target.mesh);
 	
+	ags[0] = new Agent(randomPos(), 'blue');
+	ags[1] = new Agent(randomPos(), 'red');
+	for(let i=0; i<ags.length; i++){
+		markerRootKanji.add(ags[i].mesh);
+	}
+	
 	return markerRootKanji;
 }
 
