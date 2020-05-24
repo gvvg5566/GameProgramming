@@ -400,7 +400,7 @@ function animate() {
 	arToolkitContext.update( arToolkitSource.domElement )
 
 	renderer.render (scene, camera);
-	stats.();
+	stats.update();
 
 	let obsPos =  markerKanji.position.clone().sub (markerHiro.position)
 	if (markerHiro.visible === true && markerKanji.visible === true) 
