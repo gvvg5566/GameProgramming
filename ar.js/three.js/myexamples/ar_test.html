@@ -33,7 +33,7 @@ var ags = [];
 var obs = [];
 
 var lenght = 240;
-var height = 1;
+var height = 0.1;
 var radius = 10;
 
 class Obstacle {
@@ -172,7 +172,7 @@ function addMarkerKanji () {
 	let mesh	= new THREE.Mesh( geometry, material );
 	mesh.position.y	= geometry.parameters.height/2;		
 	
-	markerRootKanji.add (mesh);
+	//markerRootKanji.add (mesh);
 	
 	plane = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({
 		transparent: true,
@@ -186,7 +186,7 @@ function addMarkerKanji () {
         obs[2] = new Obstacle(new THREE.Vector3(0.5, 0, -0.5), 0.2);
         obs[3] = new Obstacle(new THREE.Vector3(-0.5, 0, -0.5), 0.2);
 	for(let i=0; i<obs.length; i++){
-		//markerRootKanji.add(obs[i].mesh);
+		markerRootKanji.add(obs[i].mesh);
 	}
 	
 	return markerRootKanji;
