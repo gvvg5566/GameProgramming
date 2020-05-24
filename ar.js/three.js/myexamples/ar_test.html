@@ -89,7 +89,7 @@ class Target {
   }
 
   newPos(aPos) {
-    if (this.pos.distanceTo(aPos) < 10) {
+    if (this.pos.distanceTo(aPos) < 10/240) {
       this.setPos();
     }
   }
