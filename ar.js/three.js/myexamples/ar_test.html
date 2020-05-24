@@ -44,6 +44,12 @@ function randomPos() {
         return randomPos();
       }
    }
+   for (let i = 0; i < ags.length; i++) {
+      if (pos.distanceTo(ags[i].getPos()) < 0.3) {
+        //console.log("check: "+pos.distanceTo(obs[i].getPos()));
+        return randomPos();
+      }
+   }
   return pos;
 }
 
