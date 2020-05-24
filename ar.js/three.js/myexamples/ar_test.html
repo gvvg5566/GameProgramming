@@ -324,7 +324,7 @@ function init() {
 	
 	ags[1] = new Agent(randomPos(), 'red');
 	ags[1].setTarget(target.getPos());
-	markerRootKanji.add(ags[0].mesh);
+	markerRootKanji.add(ags[1].mesh);
 	
 	scene.add (markerKanji);
 	
@@ -341,11 +341,13 @@ function animate() {
 	renderer.render (scene, camera);
 	stats.update();
 	
-	for(let i=0; i<ags.length; i++){
-		ags[i].update(0.01);
-		ags[i].setTarget(target.getPos());
-		target.newPos(ags[i].getPos());
-	}
+	ags[0].update(0.01);
+	ags[0].setTarget(target.getPos());
+	target.newPos(ags[0].getPos());
+	
+	ags[1].update(0.01);
+	ags[1].setTarget(target.getPos());
+	target.newPos(ags[1].getPos());
 
 }
 
