@@ -349,8 +349,6 @@ function animate() {
 	
 	if( arToolkitSource.ready === false )	return
 	arToolkitContext.update( arToolkitSource.domElement )
-	
-	markerHiro.children[0].rotation.x += 0.1;
 
 	renderer.render (scene, camera);
 	stats.update();
