@@ -312,7 +312,7 @@ function init() {
   scene.add(markerRoot)
 
   // build a smoothedControls
-  smoothedRoot = new THREE.Group()
+  smoothedRoot = new THREE.Group();
   scene.add(smoothedRoot)
 
   smoothedControls = new THREEx.ArSmoothedControls(smoothedRoot, {
@@ -331,7 +331,7 @@ function init() {
   document.body.appendChild(stats.dom);
 
   /////////////////////////////////////////////////////////////////////
-  plane = new THREE.Group()
+  plane = new THREE.Group();
   plane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({
     transparent: true,
     opacity: 0.5,
@@ -343,22 +343,18 @@ function init() {
 
   raycaster = new THREE.Raycaster();
   ////////////////////////
-  obs[0] = new THREE.Group()
   obs[0] = new Obstacle(new THREE.Vector3(50 / 240, 0, 50 / 240), 20 / 240);
-  obs[1] = new THREE.Group()
   obs[1] = new Obstacle(new THREE.Vector3(-50 / 240, 0, 50 / 240), 20 / 240);
-  obs[2] = new THREE.Group()
   obs[2] = new Obstacle(new THREE.Vector3(50 / 240, 0, -50 / 240), 20 / 240);
-  obs[3] = new THREE.Group()
   obs[3] = new Obstacle(new THREE.Vector3(-50 / 240, 0, -50 / 240), 20 / 240);
   arWorldRoot.add(obs[0].mesh);
   arWorldRoot.add(obs[1].mesh);
   arWorldRoot.add(obs[2].mesh);
   arWorldRoot.add(obs[3].mesh);
 
-  ags[0] = new THREE.Group()
+  ags[0] = new THREE.Group();
   ags[0] = new Agent(randomPos(), 'blue');
-  ags[1] = new THREE.Group()
+  ags[1] = new THREE.Group();
   ags[1] = new Agent(randomPos(), 'red');
   arWorldRoot.add(ags[0].mesh);
   arWorldRoot.add(ags[1].mesh);
