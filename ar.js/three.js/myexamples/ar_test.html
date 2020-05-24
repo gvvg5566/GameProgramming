@@ -148,10 +148,10 @@ function init() {
 	scene.add (markerHiro); // hide at first
 
         
-	obs[0] = new Obstacle(new THREE.Vector3(50/lenght, 0, 50/lenght), 20/lenght);
-        obs[1] = new Obstacle(new THREE.Vector3(-50/lenght, 0, 50/lenght), 20/lenght);
-        obs[2] = new Obstacle(new THREE.Vector3(50/lenght, 0, -50/lenght), 20/lenght);
-        obs[3] = new Obstacle(new THREE.Vector3(-50/lenght, 0, -50/lenght), 20/lenght);
+	obs[0] = new Obstacle(new THREE.Vector3(50, 0, 50), 20);
+        obs[1] = new Obstacle(new THREE.Vector3(-50, 0, 50), 20);
+        obs[2] = new Obstacle(new THREE.Vector3(50, 0, -50), 20);
+        obs[3] = new Obstacle(new THREE.Vector3(-50, 0, -50), 20);
 	
 	stats = new Stats();
 	document.body.appendChild( stats.dom );
